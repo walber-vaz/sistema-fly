@@ -1,0 +1,97 @@
+services:
+  db:
+    build: 
+      context: infra/prod/postgres
+      dockerfile: Dockerfile
+    volumes:
+      - $HOME/postgres/${DB_NAME}/data/postgresql:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME} -h localhost || exit 1"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    env_file:
+      - .env
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_DBS=${DB_NAME}, ${DB_NAME}_test
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    networks:
+      - net_sistema_fly
+    restart: always
+
+  backend:
+    restart: always
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    networks:
+      - net_sistema_fly
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL=postgresql+psycopg://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      SECRET_KEY=${SECRET_KEY}
+      JWT_ALGORITHM=${JWT_ALGORITHM}
+      JWT_ACCESS_TOKEN_EXPIRE_DAY=${JWT_ACCESS_TOKEN_EXPIRE_DAY}
+      JWT_ISSUER=${JWT_ISSUER}
+      JWT_AUDIENCE=${JWT_AUDIENCE}
+      ENVIRONMENT=${ENVIRONMENT}
+    # Todo: Add healthcheck
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=net_sistema_fly
+      - traefik.constraint-label=net_sistema_fly
+      - traefik.http.services.backend.loadbalancer.server.port=8000
+      - traefik.http.routers.backend-backend-http.rule=Host(`apisf.${DOMAIN}`)
+      - traefik.http.routers.backend-backend-http.entrypoints=http
+      - traefik.http.routers.backend-backend-https.rule=Host(`apisf.${DOMAIN}`)
+      - traefik.http.routers.backend-backend-https.entrypoints=https
+      - traefik.http.routers.backend-backend-https.tls=true
+      - traefik.http.routers.backend-backend-https.tls.certresolver=le
+      - traefik.http.routers.backend-backend-http.middlewares=https-redirect
+
+  frontend:
+    restart: always
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=https://apisf.${DOMAIN}/api/v1
+        - NODE_ENV=production
+    networks:
+      - net_sistema_fly
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=net_sistema_fly
+      - traefik.constraint-label=net_sistema_fly
+      - traefik.http.services.frontend.loadbalancer.server.port=80
+      - traefik.http.routers.frontend-frontend-http.rule=Host(`sistemafly.${DOMAIN}`)
+      - traefik.http.routers.frontend-frontend-http.entrypoints=http
+      - traefik.http.routers.frontend-frontend-https.rule=Host(`sistemafly.${DOMAIN}`)
+      - traefik.http.routers.frontend-frontend-https.entrypoints=https
+      - traefik.http.routers.frontend-frontend-https.tls=true
+      - traefik.http.routers.frontend-frontend-https.tls.certresolver=le
+      - traefik.http.routers.frontend-frontend-http.middlewares=https-redirect
+    depends_on:
+      - backend
+
+networks:
+  net_sistema_fly:
+    external: true
+
+volumes:
+  postgres_data:
