@@ -1,0 +1,42 @@
+{
+    "[python]": {
+        "diffEditor.ignoreTrimWhitespace": false,
+        "gitlens.codeLens.symbolScopes": [
+            "!Module"
+        ],
+        "editor.formatOnType": true,
+        "editor.wordBasedSuggestions": "off",
+        "editor.tabSize": 4,
+        "editor.formatOnPaste": true,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.rulers": [
+            88
+        ],
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "always"
+        },
+    },
+    "black-formatter.args": [
+        "--line-length=88",
+        "--skip-string-normalization",
+        "--skip-magic-trailing-comma",
+        "--exclude=.venv",
+        "--exclude=.git",
+        "--exclude=migrations"
+    ],
+    "python.analysis.autoImportCompletions": true,
+    "python.languageServer": "Pylance",
+    "pylint.args": [
+        "--errors-only",
+        "--max-line-length=88",
+        "--disable=C0114,C0115,C0116,C0103,R0903,E0401,E0307,E1101,E1102"
+    ],
+    "flake8.args": [
+        "--max-line-length=88",
+        "--ignore=E203"
+    ],
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+}

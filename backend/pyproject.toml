@@ -1,0 +1,61 @@
+[tool.poetry]
+name = "app"
+version = "0.0.1"
+description = "Api para gerenciamento de loja, produtos e vendas"
+authors = ["Walber Vaz <wvs.walber@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.12.*"
+fastapi = { extras = ["standard"], version = "^0.115.6" }
+httpx = "^0.28.1"
+sqlalchemy = { extras = ["async"], version = "^2.0.36" }
+pydantic-settings = "^2.7.0"
+alembic = "^1.14.0"
+pyjwt = "^2.10.1"
+pwdlib = { extras = ["argon2"], version = "^0.2.1" }
+python-multipart = "^0.0.20"
+psycopg = { extras = ["binary"], version = "^3.2.3" }
+humanize = "^4.11.0"
+uvicorn = { extras = ["standard"], version = "^0.34.0" }
+sentry-sdk = { extras = ["fastapi"], version = "^2.19.2" }
+python-barcode = {extras = ["images"], version = "^0.15.1"}
+pillow = "^11.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+pytest-cov = "^6.0.0"
+taskipy = "^1.14.1"
+ruff = "^0.8.4"
+
+[tool.ruff]
+line-length = 88
+extend-exclude = ['migrations']
+
+[tool.ruff.lint]
+preview = true
+select = ['I', 'F', 'E', 'W', 'PL', 'PT']
+ignore = ['PLW0108', 'PLR2004', 'PLW2901', 'PLR0916', 'PLR6301']
+
+[tool.ruff.format]
+preview = true
+quote-style = 'single'
+
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = '-p no:warnings'
+
+[tool.taskipy.tasks]
+lint = 'ruff check .; ruff check . --diff'
+format = 'ruff check . --fix; ruff format .'
+run = 'fastapi dev app/main.py'
+start = 'uvicorn app.main:app --host 0.0.0.0 --workers 4'
+pre_test = 'task lint'
+test = 'pytest -s -x --cov=app -vv'
+post_test = 'coverage html'
+makemigrations = 'alembic revision --autogenerate -m'
+migrate = 'alembic upgrade head'
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,49 @@
+services:
+  db:
+    build: infra/postgres
+    volumes:
+      - $HOME/.postgres/api_estoque_db/data/postgresql:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DBS=api_estoque_db, api_estoque_db_test
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=docker
+    networks:
+      - api-estoque
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql+psycopg://docker:docker@db:5432/api_estoque_db_test
+      - JWT_SECRET=${SECRET_KEY}
+      - JWT_ALGORITHM=${JWT_ALGORITHM}
+      - JWT_ACCESS_TOKEN_EXPIRE_DAY=${JWT_ACCESS_TOKEN_EXPIRE_DAY}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+    networks:
+      - api-estoque
+    develop:
+      watch:
+        - action: rebuild
+          path: .
+          ignore:
+            - .git
+
+networks:
+  api-estoque:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

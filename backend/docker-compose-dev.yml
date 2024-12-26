@@ -1,0 +1,11 @@
+services:
+  db:
+    build: infra/postgres
+    volumes:
+      - $HOME/.postgres/api_estoque_db/data/postgresql:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DBS=api_estoque_db, api_estoque_db_test
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=docker
