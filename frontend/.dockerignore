@@ -1,0 +1,10 @@
+node_modules/
+dist
+.nvmrc
+.editorconfig
+.git/
+.vscode/
+.idea/
+eslint.config.js
+.prettierignore
+.prettierrc.json
