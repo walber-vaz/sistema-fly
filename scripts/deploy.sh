@@ -18,13 +18,6 @@ check_docker() {
     fi
 }
 
-# Função para verificar se o docker-compose está instalado
-check_docker_compose() {
-    if ! command -v docker-compose >/dev/null 2>&1; then
-        log "Erro: docker-compose não está instalado."
-        exit 1
-    fi
-}
 
 # Função para verificar se os arquivos docker-compose existem
 check_compose_files() {
@@ -41,7 +34,6 @@ check_compose_files() {
 # Executa verificações iniciais
 log "Iniciando verificações de pré-requisitos..."
 check_docker
-check_docker_compose
 check_compose_files
 
 # Criar rede se não existir
