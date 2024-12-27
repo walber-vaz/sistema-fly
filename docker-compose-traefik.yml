@@ -7,7 +7,7 @@ services:
     restart: always
     labels:
       - traefik.enable=true
-      - traefik.docker.network=traefik-public
+      - traefik.docker.network=net_sistema_fly
       - traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080
       - traefik.http.routers.traefik-dashboard-http.entrypoints=http
       - traefik.http.routers.traefik-dashboard-http.rule=Host(`traefik.${DOMAIN?Variable not set}`)
@@ -36,11 +36,11 @@ services:
       - --log
       - --api
     networks:
-      - traefik-public
+      - net_sistema_fly
 
 volumes:
   traefik-public-certificates:
 
 networks:
-  traefik-public:
+  net_sistema_fly:
     external: true
