@@ -38,13 +38,13 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL=postgresql+psycopg://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-      SECRET_KEY=${SECRET_KEY}
-      JWT_ALGORITHM=${JWT_ALGORITHM}
-      JWT_ACCESS_TOKEN_EXPIRE_DAY=${JWT_ACCESS_TOKEN_EXPIRE_DAY}
-      JWT_ISSUER=${JWT_ISSUER}
-      JWT_AUDIENCE=${JWT_AUDIENCE}
-      ENVIRONMENT=${ENVIRONMENT}
+      - DATABASE_URL=postgresql+psycopg://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - SECRET_KEY=${SECRET_KEY}
+      - JWT_ALGORITHM=${JWT_ALGORITHM}
+      - JWT_ACCESS_TOKEN_EXPIRE_DAY=${JWT_ACCESS_TOKEN_EXPIRE_DAY}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+      - ENVIRONMENT=${ENVIRONMENT}
     # Todo: Add healthcheck
     # healthcheck:
     #   test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
