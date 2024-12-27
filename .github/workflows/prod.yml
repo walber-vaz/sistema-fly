@@ -47,7 +47,31 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: DB_NAME,DB_USER,DB_PASSWORD,SECRET_KEY,JWT_ALGORITHM,JWT_ACCESS_TOKEN_EXPIRE_DAY,JWT_ISSUER,JWT_AUDIENCE,ENVIRONMENT,DOMAIN,EMAIL,USERNAME,HASHED_PASSWORD
           script: |
             cd /home/sistemafly/sistemafly
+
+            # Criar o arquivo .env com as variáveis
+            echo "DB_NAME=${DB_NAME}" > .env
+            echo "DB_USER=${DB_USER}" >> .env
+            echo "DB_PASSWORD=${DB_PASSWORD}" >> .env
+            echo "SECRET_KEY=${SECRET_KEY}" >> .env
+            echo "JWT_ALGORITHM=${JWT_ALGORITHM}" >> .env
+            echo "JWT_ACCESS_TOKEN_EXPIRE_DAY=${JWT_ACCESS_TOKEN_EXPIRE_DAY}" >> .env
+            echo "JWT_ISSUER=${JWT_ISSUER}" >> .env
+            echo "JWT_AUDIENCE=${JWT_AUDIENCE}" >> .env
+            echo "ENVIRONMENT=${ENVIRONMENT}" >> .env
+            echo "DOMAIN=${DOMAIN}" >> .env
+            echo "EMAIL=${EMAIL}" >> .env
+            echo "USERNAME=${USERNAME}" >> .env
+            echo "HASHED_PASSWORD=${HASHED_PASSWORD}" >> .env
+            
+            # Verificar se o arquivo foi criado corretamente
+            echo "Conteúdo do arquivo .env (sem valores sensíveis):"
+            cat .env | grep -v "PASSWORD\|KEY"
+            
+            # Ajustar permissões e executar deploy
+            chmod 600 .env
+            
             chmod +x ./scripts/deploy.sh
             bash ./scripts/deploy.sh 2>&1 | tee deploy.log
