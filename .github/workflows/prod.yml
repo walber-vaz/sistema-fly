@@ -1,0 +1,37 @@
+name: '[DEPLOY] Production'
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.tag.outputs.image_tag }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup SCP Action
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          password: ${{ secrets.PASSWORD }}
+          source: .
+          target: "/sistemafly"
+
+      - name: Run SSH Commands
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd /sistemafly/scripts
+            chmod +x deploy.sh
+            bash deploy.sh 2>&1 | tee deploy.log
