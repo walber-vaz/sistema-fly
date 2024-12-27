@@ -3,7 +3,7 @@ services:
     image: postgres:16
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME} -h db || exit 1"]
       interval: 10s
       retries: 5
       start_period: 30s
@@ -28,9 +28,7 @@ services:
     networks:
       - net_sistema_fly
     depends_on:
-      db:
-        condition: service_healthy
-        restart: true
+      - db
     env_file:
       - .env
     environment:
