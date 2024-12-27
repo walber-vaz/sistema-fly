@@ -54,7 +54,7 @@ fi
 # Gerenciar Traefik
 if ! docker ps | grep -q traefik; then
     log "Iniciando Traefik pela primeira vez..."
-    if ! docker-compose -f docker-compose-traefik.yml up -d; then
+    if ! docker compose -f docker-compose-traefik.yml up -d; then
         log "Erro ao iniciar Traefik"
         exit 1
     fi
@@ -62,7 +62,7 @@ if ! docker ps | grep -q traefik; then
     sleep 30
 else
     log "Atualizando Traefik..."
-    if ! docker-compose -f docker-compose-traefik.yml up -d --force-recreate; then
+    if ! docker compose -f docker-compose-traefik.yml up -d --force-recreate; then
         log "Erro ao atualizar Traefik"
         exit 1
     fi
@@ -73,7 +73,7 @@ sleep 10
 
 # Deploy dos serviços principais
 log "Iniciando deploy dos serviços principais..."
-if ! docker-compose -f docker-compose-prod.yml up -d --build --force-recreate; then
+if ! docker compose -f docker-compose-prod.yml up -d --build --force-recreate; then
     log "Erro ao fazer deploy dos serviços principais"
     exit 1
 fi
