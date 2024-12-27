@@ -1,13 +1,10 @@
-FROM node:20.18.1-bookworm AS build-stage
+FROM node:22.12.0-bookworm AS build-stage
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install -g npm@11.0.0 \
-    && npm install
-
-COPY . ./
+RUN npm install
 
 ARG VITE_API_URL=${VITE_API_URL}
 
