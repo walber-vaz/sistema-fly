@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16
+    build: infra/prod/postgres
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME} -h db || exit 1"]
@@ -14,7 +14,7 @@ services:
       - .env
     environment:
       - PGDATA=/var/lib/postgresql/data/pgdata
-      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_DBS=${DB_NAME}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     networks:
@@ -25,6 +25,8 @@ services:
     build:
       context: backend
       dockerfile: Dockerfile
+      args:
+        - BASE_URL_API=https://apisf.${DOMAIN}
     networks:
       - net_sistema_fly
     depends_on:
