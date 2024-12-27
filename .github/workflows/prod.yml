@@ -31,6 +31,20 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: |
+            DB_NAME: ${{ secrets.DB_NAME }}
+            DB_USER: ${{ secrets.DB_USER }}
+            DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+            SECRET_KEY: ${{ secrets.SECRET_KEY }}
+            JWT_ALGORITHM: ${{ secrets.JWT_ALGORITHM }}
+            JWT_ACCESS_TOKEN_EXPIRE_DAY: ${{ secrets.JWT_ACCESS_TOKEN_EXPIRE_DAY }}
+            JWT_ISSUER: ${{ secrets.JWT_ISSUER }}
+            JWT_AUDIENCE: ${{ secrets.JWT_AUDIENCE }}
+            ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+            DOMAIN: ${{ secrets.DOMAIN }}
+            EMAIL: ${{ secrets.EMAIL }}
+            USERNAME: ${{ secrets.USERNAME }}
+            HASHED_PASSWORD: ${{ secrets.HASHED_PASSWORD }}
           script: |
             cd /home/sistemafly/sistemafly
             chmod +x ./scripts/deploy.sh
