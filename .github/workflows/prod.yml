@@ -20,8 +20,8 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "."
-          target: "/sistemafly"
+          source: .
+          target: "/home/sistemafly/sistemafly"
           strip_components: 0
           timeout: 120s
 
