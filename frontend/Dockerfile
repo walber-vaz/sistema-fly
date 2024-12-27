@@ -4,13 +4,13 @@ WORKDIR /app
 
 COPY package*.json ./app/
 
-RUN npm install --silent
+RUN npm install
 
 COPY ./ /app/
 
 ARG VITE_API_URL=${VITE_API_URL}
 
-RUN npm run build --silent
+RUN npm run build
 
 FROM nginx:stable-alpine as production-stage
 
