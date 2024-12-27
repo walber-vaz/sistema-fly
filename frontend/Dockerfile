@@ -10,8 +10,6 @@ ARG VITE_API_URL=${VITE_API_URL}
 
 COPY . ./
 
-RUN ls -la
-
 RUN npm run build
 
 FROM nginx:stable-alpine as production-stage

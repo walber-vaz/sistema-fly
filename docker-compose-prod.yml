@@ -4,7 +4,7 @@ services:
       context: infra/prod/postgres
       dockerfile: Dockerfile
     volumes:
-      - $HOME/postgres/${DB_NAME}/data/postgresql:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data/pgdata
     ports:
       - 5432:5432
     healthcheck:
@@ -17,7 +17,7 @@ services:
       - .env
     environment:
       - PGDATA=/var/lib/postgresql/data/pgdata
-      - POSTGRES_DBS=${DB_NAME}, ${DB_NAME}_test
+      - POSTGRES_DBS=${DB_NAME}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     networks:
