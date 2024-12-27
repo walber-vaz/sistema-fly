@@ -14,14 +14,25 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Setup SSH Directory
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/private_key
+          chmod 600 ~/.ssh/private_key
+          echo "Host *
+            StrictHostKeyChecking no" > ~/.ssh/config
+
       - name: Setup SCP Action
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key_path: ~/.ssh/private_key
           source: .
           target: "/sistemafly"
+          strip_components: 0
+          overwrite: true
+          timeout: 120s
 
       - name: Run SSH Commands
         uses: appleboy/ssh-action@v1.2.0
@@ -30,6 +41,5 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /sistemafly/scripts
-            chmod +x deploy.sh
-            bash deploy.sh 2>&1 | tee deploy.log
+            chmod +x ./scripts/deploy.sh
+            bash ./scriptsdeploy.sh 2>&1 | tee deploy.log
