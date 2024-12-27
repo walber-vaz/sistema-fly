@@ -32,5 +32,6 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            chmod +x /home/sistemafly/sistemafly/scripts/deploy.sh
-            bash /home/sistemafly/sistemafly/scripts/deploy.sh 2>&1 | tee deploy.log
+            cd /home/sistemafly/sistemafly
+            chmod +x ./scripts/deploy.sh
+            bash ./scripts/deploy.sh 2>&1 | tee deploy.log
