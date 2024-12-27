@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     VERSION: str = PYPROJECT_CONTENT['version']
     DESCRIPTION: str = PYPROJECT_CONTENT['description']
 
-    API_PREFIX: str = '/api/v1'
+    API_PREFIX: str = '/v1'
 
 
 settings: Settings = Settings()  # type: ignore
