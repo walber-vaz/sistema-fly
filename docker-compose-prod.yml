@@ -1,16 +1,15 @@
 services:
   db:
     image: postgres:16
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/pgdata
-    ports:
-      - 5432:5432
+    restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_PASSWORD}"]
       interval: 10s
       retries: 5
       start_period: 30s
       timeout: 10s
+    volumes:
+      - app-db-data:/var/lib/postgresql/data/pgdata
     env_file:
       - .env
     environment:
@@ -20,7 +19,6 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     networks:
       - net_sistema_fly
-    restart: always
 
   backend:
     restart: always
@@ -92,4 +90,4 @@ networks:
     external: true
 
 volumes:
-  postgres_data:
+  app-db-data:
