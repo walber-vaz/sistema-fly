@@ -20,7 +20,7 @@ services:
       dockerfile: Dockerfile
       args:
         - NODE_ENV=production
-        - VITE_API_URL=https://apisf.wssoftwares.com.br
+        - VITE_API_URL=https://apisf.wssoftwares.com.br/v1
     ports:
       - "8080:80"
     networks:
