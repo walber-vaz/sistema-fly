@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16.6-alpine
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    networks:
+      - shared_network
+  
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
+        - VITE_API_URL=http://apisf.wssoftwares.com.br
+    ports:
+      - "8080:80"
+    networks:
+      - shared_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    networks:
+      - shared_network
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql+psycopg://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - SECRET_KEY=${SECRET_KEY}
+      - JWT_ALGORITHM=${JWT_ALGORITHM}
+      - JWT_ACCESS_TOKEN_EXPIRE_DAY=${JWT_ACCESS_TOKEN_EXPIRE_DAY}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+      - ENVIRONMENT=${ENVIRONMENT}
+
+networks:
+  shared_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
