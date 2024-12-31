@@ -122,5 +122,5 @@ class UserCreate(UserBase):
         return v.strip()
 
 
-class UserResponse(BaseModel):
+class ClientResponse(BaseModel):
     message: str
