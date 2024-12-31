@@ -1,5 +1,5 @@
 .PHONY: clean
-clean:            ## Clean unused files.
+clean:
 	@find ./ -name '*.pyc' -exec rm -f {} \;
 	@find ./ -name '__pycache__' -exec rm -rf {} \;
 	@find ./ -name 'Thumbs.db' -exec rm -f {} \;
@@ -17,3 +17,7 @@ clean:            ## Clean unused files.
 .PHONY: deploy
 deploy:
 	@rsync -av --exclude-from=.rsignore ./ sistemafly:/home/sistemafly/sistemafly
+
+.PHONY: run
+run:
+	@docker compose up --build --force-recreate -d
