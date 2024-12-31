@@ -17,3 +17,4 @@ infra/
 .github/
 .python-version
 requirements-dev.txt
+requirements.txt

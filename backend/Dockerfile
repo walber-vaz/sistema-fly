@@ -1,41 +1,36 @@
-FROM python:3.12.8-alpine3.21 AS builder
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm AS builder
 
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
+    PYTHONDONTWRITEBYTECODE=1 \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
 
 WORKDIR /build
 
-RUN apk add --no-cache \
-    gcc \
-    musl-dev \
-    python3-dev \
-    libffi-dev \
-    openssl-dev \
-    cargo \
-    rust
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-install-project --no-dev
 
-RUN pip install --no-cache-dir -U pip setuptools wheel \
-    && pip install --no-cache-dir poetry \
-    && poetry config virtualenvs.in-project true \
-    && poetry config installer.max-workers 10
+ADD . /build
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev
 
-COPY pyproject.toml poetry.lock ./
-RUN poetry install --no-interaction --no-ansi --no-dev
-
-FROM python:3.12.8-alpine3.21
+FROM python:3.12-slim-bookworm
 
 WORKDIR /build
 
-RUN apk add --no-cache libffi libstdc++ su-exec && \
-    addgroup -S sfuser -g 1001 && \
-    adduser -S sfuser -G sfuser -u 1001 -s /bin/false
+RUN addgroup --gid 1001 --system sfuser \
+    && adduser --gid 1001 --shell /bin/false --disabled-password --uid 1001 sfuser
 
-COPY --from=builder --chown=sfuser:sfuser /build/.venv .venv
+COPY --from=builder --chown=sfuser:sfuser /build /build
 
-COPY --chown=sfuser:sfuser . .
+ENV PATH="/build/.venv/bin:$PATH"
 
-RUN chmod +x ./scripts/entrypoint.sh
-
+RUN chmod +x ./scripts/entrypoint.sh \
+    && chown -R sfuser:sfuser /build
 EXPOSE 8000
 
-ENTRYPOINT ["/build/scripts/entrypoint.sh"]
+ENTRYPOINT []
+
+CMD ["sh", "./scripts/entrypoint.sh"]
