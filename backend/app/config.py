@@ -1,6 +1,6 @@
+import tomllib
 from pathlib import Path
 
-import tomllib
 from pydantic import HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -8,7 +8,7 @@ from app.constants import Environment
 
 PROJECT_DIR = Path(__file__).parent.parent
 with open(f'{PROJECT_DIR}/pyproject.toml', 'rb') as f:
-    PYPROJECT_CONTENT = tomllib.load(f)['tool']['poetry']
+    PYPROJECT_CONTENT = tomllib.load(f)['project']
 
 
 class Settings(BaseSettings):

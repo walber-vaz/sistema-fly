@@ -1,13 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 set -x
 
 # Run migrations alembic
-.venv/bin/alembic upgrade head
+alembic upgrade head
 
 # Run the application
-exec su-exec sfuser .venv/bin/uvicorn \
+exec runuser -u sfuser -- uvicorn \
     --host 0.0.0.0 \
     --workers 4 \
     --forwarded-allow-ips='*' \
