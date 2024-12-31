@@ -21,10 +21,8 @@ class Category:
         unique=True,
     )
     name: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
-    user_id: Mapped[UUID] = mapped_column(
-        ForeignKey('tb_users.id'),
-        nullable=False,
-        index=True,
+    client_id: Mapped[UUID] = mapped_column(
+        ForeignKey('tb_clients.id'), nullable=False, index=True
     )
     created_at: Mapped[datetime] = mapped_column(
         default=func.now(),
@@ -41,8 +39,8 @@ class Category:
         server_default=func.now(),
         server_onupdate=func.now(),
     )
-    user: Mapped['User'] = relationship(  # noqa: F821 # type: ignore
-        'User', back_populates='categories', init=False
+    client: Mapped['Client'] = relationship(  # noqa: F821 # type: ignore
+        'Client', back_populates='categories', init=False, lazy='selectin'
     )
     products: Mapped[list['Product']] = relationship(  # noqa: F821 # type: ignore
         'Product',

@@ -28,8 +28,8 @@ class Product:
     stock: Mapped[int] = mapped_column(nullable=False)
     code_product: Mapped[str] = mapped_column(String(8), nullable=False, unique=True)
     barcode: Mapped[str] = mapped_column(String(13), nullable=False, unique=True)
-    user_id: Mapped[UUID] = mapped_column(
-        ForeignKey('tb_users.id'), nullable=False, index=True
+    client_id: Mapped[UUID] = mapped_column(
+        ForeignKey('tb_clients.id'), nullable=False, index=True
     )
     created_at: Mapped[datetime] = mapped_column(
         default=func.now(),
@@ -49,8 +49,8 @@ class Product:
     brand: Mapped['Brand'] = relationship(  # noqa: F821 # type: ignore
         'Brand', back_populates='products', init=False, lazy='selectin'
     )
-    user: Mapped['User'] = relationship(  # noqa: F821 # type: ignore
-        'User', back_populates='products', init=False, lazy='selectin'
+    client: Mapped['Client'] = relationship(  # noqa: F821 # type: ignore
+        'Client', back_populates='products', init=False, lazy='selectin'
     )
     category: Mapped['Category'] = relationship(  # noqa: F821 # type: ignore
         'Category', back_populates='products', init=False, lazy='selectin'
