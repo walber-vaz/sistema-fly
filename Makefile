@@ -13,3 +13,7 @@ clean:            ## Clean unused files.
 	@rm -rf htmlcov
 	@rm -rf .tox/
 	@rm -rf docs/_build
+
+.PHONY: deploy
+deploy:
+	@rsync -av --exclude-from=.rsignore ./ sistemafly:/home/sistemafly/sistemafly
