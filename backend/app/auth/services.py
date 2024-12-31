@@ -6,7 +6,11 @@ from jwt import DecodeError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.exceptions import NotAuthenticatedException, PermissionDeniedException
+from app.auth.exceptions import (
+    ForbiddenException,
+    NotAuthenticatedException,
+    PermissionDeniedException,
+)
 from app.auth.schemas import Login, Token, TokenData
 from app.config import settings
 from app.database import get_session
@@ -14,6 +18,7 @@ from app.security.hash import verify_password
 from app.security.jwt import create_access_token, decode_token
 from app.user import service as user_services
 from app.user.model import User
+from app.utils import RoleEnum
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f'{settings.API_PREFIX}/auth/login')
 
@@ -43,6 +48,20 @@ async def get_current_user(
     return result
 
 
+async def check_admin_role(current_user: User = Depends(get_current_user)):
+    if current_user.role != RoleEnum.ADMIN:
+        raise ForbiddenException()
+
+    return current_user
+
+
+async def check_user_access(current_user: User = Depends(get_current_user)):
+    if not current_user.is_active or not current_user.client:
+        raise ForbiddenException()
+
+    return current_user
+
+
 async def login(data: Login, session: AsyncSession) -> Token:
     try:
         stmt = select(User).where(User.email == data.username)
@@ -55,6 +74,10 @@ async def login(data: Login, session: AsyncSession) -> Token:
             raise PermissionDeniedException('Email ou senha inválidos')
 
         token = create_access_token({'sub': str(result.id)})
+
+        return Token(access_token=token, token_type='bearer')
+    except Exception as e:
+        raise PermissionDeniedException('Email ou senha inválidos') from e
 
         return Token(access_token=token, token_type='bearer')
     except Exception as e:

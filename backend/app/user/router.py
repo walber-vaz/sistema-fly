@@ -12,11 +12,12 @@ from app.user.schemas import UserCreate, UserResponse, UserUpdate
 
 router = APIRouter(tags=['User'], prefix='/users')
 Session = Annotated[AsyncSession, Depends(get_session)]
-CurrentUser = Annotated[User, Depends(auth_services.get_current_user)]
+CurrentUser = Annotated[User, Depends(auth_services.check_user_access)]
+AdminUser = Annotated[User, Depends(auth_services.check_admin_role)]
 
 
 @router.post('/create/', status_code=HTTPStatus.CREATED, response_model=UserResponse)
-async def create_user(user: UserCreate, session: Session):
+async def create_user(user: UserCreate, current_user: AdminUser, session: Session):
     return await user_service.store(user, session)
 
 
