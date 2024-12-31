@@ -45,6 +45,11 @@ class ServerError(DetailedHTTPException):
     DETAIL = 'Error interno do servidor'
 
 
+class Forbidden(DetailedHTTPException):
+    STATUS_CODE = status.HTTP_403_FORBIDDEN
+    DETAIL = 'Proibido'
+
+
 class NotAuthenticated(DetailedHTTPException):
     STATUS_CODE = status.HTTP_401_UNAUTHORIZED
     DETAIL = 'Não autenticado'
