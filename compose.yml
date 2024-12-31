@@ -46,6 +46,7 @@ services:
       - JWT_ISSUER=${JWT_ISSUER}
       - JWT_AUDIENCE=${JWT_AUDIENCE}
       - ENVIRONMENT=${ENVIRONMENT}
+      - SENTRY_DSN=${SENTRY_DSN}
 
 networks:
   shared_network:
