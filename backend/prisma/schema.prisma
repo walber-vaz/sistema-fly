@@ -32,7 +32,7 @@ model Address {
     street     String    @db.VarChar(80)
     city       String    @db.VarChar(80)
     state      String    @db.Char(2)
-    zip        String    @db.Char(5)
+    zip        String    @db.Char(9)
     number     String    @db.VarChar(10)
     complement String?   @db.Text
     createdAt  DateTime  @default(now()) @db.Timestamp(6)
