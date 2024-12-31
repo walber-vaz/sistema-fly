@@ -8,6 +8,7 @@ from app.user.exceptions import (
     LengthSurnameException,
     PasswordRequirementsException,
 )
+from app.utils import RoleEnum
 
 
 class UserBase(BaseModel):
@@ -16,6 +17,8 @@ class UserBase(BaseModel):
     email: EmailStr
     password: str
     phone_number: str
+    role: RoleEnum = RoleEnum.CUSTOMER
+    is_active: bool = True
 
 
 class UserRead(BaseModel):
