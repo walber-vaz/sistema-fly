@@ -6,3 +6,5 @@ dist/
 README.md
 .git/
 .gitignore
+# Qualquer arquivos de test
+*-(spec|test).ts
