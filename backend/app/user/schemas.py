@@ -11,6 +11,40 @@ from app.user.exceptions import (
 from app.utils import RoleEnum
 
 
+class ClientBase(BaseModel):
+    user_id: UUID4
+    company_name: str
+
+
+class ClientCreate(ClientBase):
+    @field_validator('company_name')
+    @classmethod
+    def validate_company_name(cls, v: str):
+        if len(v) > 100 or len(v) < 2:
+            raise LengthPhoneException(
+                'Nome da empresa deve ter entre 2 e 100 caracteres'
+            )
+        return v.strip()
+
+
+class ClientRead(BaseModel):
+    id: UUID4
+    company_name: str
+    created_at: str
+    updated_at: str
+
+
+class ClientGetData(BaseModel):
+    id: UUID4
+    company_name: str
+    first_name: str
+    surname: str
+    email: EmailStr
+    phone_number: str
+    created_at: str
+    updated_at: str
+
+
 class UserBase(BaseModel):
     first_name: str
     surname: str
@@ -22,7 +56,6 @@ class UserBase(BaseModel):
 
 
 class UserRead(BaseModel):
-    id: UUID4
     first_name: str
     surname: str
     email: EmailStr
@@ -40,13 +73,15 @@ class UserReadMe(BaseModel):
     updated_at: str
 
 
-class UserUpdate(BaseModel):
+class ClientUpdate(BaseModel):
     first_name: str | None = None
+    company_name: str | None = None
     surname: str | None = None
     email: EmailStr | None = None
     phone_number: str | None = None
     password: str | None = None
     is_active: bool | None = None
+    role: RoleEnum | None = None
 
 
 class UserCreate(UserBase):
