@@ -1,5 +1,11 @@
+from enum import Enum
 from random import randint
 from uuid import uuid4
+
+
+class RoleEnum(Enum):
+    ADMIN = 'admin'
+    CUSTOMER = 'customer'
 
 
 def pagination(total: int, page: int, per_page: int) -> dict:
