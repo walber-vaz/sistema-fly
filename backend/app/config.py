@@ -16,6 +16,7 @@ class Settings(BaseSettings):
         env_file='.env', env_file_encoding='utf-8', extra='allow', case_sensitive=True
     )
 
+    ADMIN_USER: dict[str, str]
     BASE_URL_API: HttpUrl = 'http://localhost:8000'
     SENTRY_DSN: HttpUrl | None = None
     ENVIRONMENT: Environment = Environment.LOCAL
