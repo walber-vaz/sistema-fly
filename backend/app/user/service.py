@@ -44,6 +44,7 @@ async def store(user: UserCreate, session: AsyncSession):
             surname=user.surname,
             phone_number=user.phone_number,
             password=pwd_hash,
+            role=user.role,
         )
 
         session.add(result)
