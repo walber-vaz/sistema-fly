@@ -1,0 +1,8 @@
+test/
+.vscode/
+node_modules/
+infra/
+dist/
+README.md
+.git/
+.gitignore
