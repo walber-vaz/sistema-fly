@@ -77,7 +77,21 @@ class Client:
         unique=True,
     )
     company_name: Mapped[str] = mapped_column(String(100), nullable=False)
-
+    created_at: Mapped[datetime] = mapped_column(
+        default=func.now(),
+        nullable=False,
+        init=False,
+        index=True,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        default=func.now(),
+        nullable=False,
+        init=False,
+        onupdate=func.now(),
+        server_default=func.now(),
+        server_onupdate=func.now(),
+    )
     user: Mapped['User'] = relationship('User', back_populates='client', init=False)
     brands: Mapped[list['Brand']] = relationship(  # noqa: F821 # type: ignore
         'Brand', back_populates='client', init=False, lazy='selectin'
