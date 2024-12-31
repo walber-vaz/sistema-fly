@@ -143,6 +143,9 @@ async def update(id: UUID, client: ClientUpdate, session: AsyncSession):
         return ClientResponse(
             message='Cliente atualizado com sucesso',
         )
+    except HTTPException as e:
+        logger.error(e)
+        raise e
     except IntegrityError:
         await session.rollback()
         raise ErrorCreateUserException(
