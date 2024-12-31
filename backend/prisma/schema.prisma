@@ -1,0 +1,114 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum UserType {
+    CUSTOMER
+    ADMIN
+}
+
+model Company {
+    id        String   @id @default(cuid())
+    name      String   @unique @db.VarChar(80)
+    logoUrl   String?
+    addressId String?
+    userId    String   @unique
+    createdAt DateTime @default(now()) @db.Timestamp(6)
+    updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(6)
+
+    address Address? @relation(fields: [addressId], references: [id])
+    user    User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+    @@map("tb_companies")
+}
+
+model Address {
+    id         String    @id @default(cuid())
+    street     String    @db.VarChar(80)
+    city       String    @db.VarChar(80)
+    state      String    @db.Char(2)
+    zip        String    @db.Char(5)
+    number     String    @db.VarChar(10)
+    complement String?   @db.Text
+    createdAt  DateTime  @default(now()) @db.Timestamp(6)
+    updatedAt  DateTime  @default(now()) @updatedAt @db.Timestamp(6)
+    Company    Company[]
+    user       User[]
+
+    @@map("tb_addresses")
+}
+
+model User {
+    id                  String           @id @default(cuid())
+    firstName           String           @db.VarChar(80)
+    lastName            String           @db.VarChar(80)
+    email               String           @unique @db.VarChar(200)
+    password            String
+    addressId           String?
+    userType            UserType         @default(CUSTOMER)
+    roles               Role[]
+    permissions         UserPermission[]
+    lastLogin           DateTime?
+    failedLoginAttempts Int?             @default(0)
+    passwordChangedAt   DateTime?
+    resetPasswordToken  String?
+    tokenExpiresAt      DateTime?
+    isActive            Boolean          @default(true) @db.Boolean
+    createdAt           DateTime         @default(now()) @db.Timestamp(6)
+    updatedAt           DateTime         @default(now()) @updatedAt @db.Timestamp(6)
+
+    Company Company?
+    Address Address? @relation(fields: [addressId], references: [id], onDelete: Restrict)
+
+    @@index([email, isActive])
+    @@index([userType])
+    @@index([lastLogin])
+    @@index([failedLoginAttempts])
+    @@map("tb_users")
+}
+
+model Role {
+    id          String       @id @default(cuid())
+    name        String       @unique @db.VarChar(80)
+    description String?      @db.Text
+    users       User[]
+    permissions Permission[]
+    createdAt   DateTime     @default(now()) @db.Timestamp(6)
+    updatedAt   DateTime     @default(now()) @updatedAt @db.Timestamp(6)
+
+    @@map("tb_roles")
+}
+
+model Permission {
+    id          String           @id @default(cuid())
+    name        String           @unique @db.VarChar(80)
+    description String?          @db.Text
+    roles       Role[]
+    users       UserPermission[]
+
+    createdAt DateTime @default(now()) @db.Timestamp(6)
+    updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(6)
+
+    @@map("tb_permissions")
+}
+
+model UserPermission {
+    id           String   @id @default(uuid())
+    userId       String
+    permissionId String
+    granted      Boolean  @default(true)
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    permission Permission @relation(fields: [permissionId], references: [id])
+    user       User       @relation(fields: [userId], references: [id])
+
+    @@unique([userId, permissionId])
+    @@index([granted])
+    @@map("tb_users_permissions")
+}

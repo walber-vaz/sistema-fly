@@ -12,39 +12,6 @@ services:
     networks:
       - api-estoque-network
 
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - 8000:8000
-    depends_on:
-      - db
-    env_file:
-      - .env
-    environment:
-      - DATABASE_URL=postgresql+psycopg://docker:docker@db/api_estoque_db_test
-      - SECRET_KEY=${SECRET_KEY}
-      - JWT_ALGORITHM=${JWT_ALGORITHM}
-      - JWT_ACCESS_TOKEN_EXPIRE_DAY=${JWT_ACCESS_TOKEN_EXPIRE_DAY}
-      - JWT_ISSUER=${JWT_ISSUER}
-      - JWT_AUDIENCE=${JWT_AUDIENCE}
-    networks:
-      - api-estoque-network
-    volumes:
-      - .:/build
-      - /build/.venv
-    develop:
-      watch:
-        - action: sync
-          path: .
-          target: /build
-          ignore:
-            - .git/
-            - .venv/
-        - action: rebuild
-          path: ./pyproject.toml
-
 networks:
   api-estoque-network:
     driver: bridge

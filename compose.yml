@@ -13,6 +13,11 @@ services:
       POSTGRES_DB: ${DB_NAME}
     networks:
       - shared_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME} -h localhost || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   
   frontend:
     build:
@@ -37,7 +42,9 @@ services:
     networks:
       - shared_network
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+        required: true
     environment:
       - DATABASE_URL=postgresql+psycopg://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       - SECRET_KEY=${SECRET_KEY}
