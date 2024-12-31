@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 import sentry_sdk
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from app.auth.router import router as auth_router
 from app.config import settings
 from app.constants import Environment
+from app.database import close_db, init_db
 from app.product.brand.router import router as brand_router
 from app.product.category.router import router as category_router
 from app.product.router import router as product_router
@@ -13,6 +16,16 @@ from app.user.router import router as user_router
 
 if settings.SENTRY_DSN and settings.ENVIRONMENT == Environment.PRODUCTION:
     sentry_sdk.init(str(settings.SENTRY_DSN), enable_tracing=True)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db()
+    try:
+        yield
+    finally:
+        await close_db()
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -25,6 +38,7 @@ app = FastAPI(
         if settings.ENVIRONMENT == Environment.PRODUCTION
         else f'{settings.API_PREFIX}/openapi.json'
     ),
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -40,4 +54,6 @@ app.include_router(user_router, prefix=settings.API_PREFIX)
 app.include_router(auth_router, prefix=settings.API_PREFIX)
 app.include_router(product_router, prefix=settings.API_PREFIX)
 app.include_router(category_router, prefix=settings.API_PREFIX)
+app.include_router(brand_router, prefix=settings.API_PREFIX)
+app.include_router(brand_router, prefix=settings.API_PREFIX)
 app.include_router(brand_router, prefix=settings.API_PREFIX)
