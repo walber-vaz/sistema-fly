@@ -19,10 +19,10 @@ from app.user.model import Client, User
 from app.user.schemas import (
     ClientGetData,
     ClientRead,
+    ClientResponse,
     ClientUpdate,
     UserCreate,
     UserRead,
-    UserResponse,
 )
 from app.utils import RoleEnum
 
@@ -69,7 +69,7 @@ async def store(user: UserCreate, session: AsyncSession):
         session.add(client)
         await session.commit()
 
-        return UserResponse(
+        return ClientResponse(
             message='Usuário criado com sucesso',
         )
     except IntegrityError:
@@ -140,8 +140,8 @@ async def update(id: UUID, client: ClientUpdate, session: AsyncSession):
 
         await session.commit()
 
-        return UserResponse(
-            message='Usuário atualizado com sucesso',
+        return ClientResponse(
+            message='Cliente atualizado com sucesso',
         )
     except IntegrityError:
         await session.rollback()
