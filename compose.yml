@@ -47,6 +47,7 @@ services:
       - JWT_AUDIENCE=${JWT_AUDIENCE}
       - ENVIRONMENT=${ENVIRONMENT}
       - SENTRY_DSN=${SENTRY_DSN}
+      - ADMIN_USER=${ADMIN_USER}
 
 networks:
   shared_network:
