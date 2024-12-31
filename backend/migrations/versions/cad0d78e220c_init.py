@@ -1,8 +1,8 @@
 """init
 
-Revision ID: 1ce24a46bab3
+Revision ID: cad0d78e220c
 Revises:
-Create Date: 2024-12-22 10:57:42.473887
+Create Date: 2024-12-31 08:55:15.999105
 
 """
 
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '1ce24a46bab3'
+revision: str = 'cad0d78e220c'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -31,6 +31,12 @@ def upgrade() -> None:
         sa.Column('email', sa.String(length=200), nullable=False),
         sa.Column('phone_number', sa.String(length=12), nullable=True),
         sa.Column('password', sa.String(), nullable=False),
+        sa.Column(
+            'role',
+            sa.Enum('ADMIN', 'CUSTOMER', name='roleenum'),
+            server_default='CUSTOMER',
+            nullable=False,
+        ),
         sa.Column('is_active', sa.Boolean(), server_default='true', nullable=False),
         sa.Column(
             'created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False
@@ -52,12 +58,31 @@ def upgrade() -> None:
         op.f('tb_users_phone_number_idx'), 'tb_users', ['phone_number'], unique=False
     )
     op.create_table(
+        'tb_clients',
+        sa.Column(
+            'id', sa.Uuid(), server_default=sa.text('gen_random_uuid()'), nullable=False
+        ),
+        sa.Column('user_id', sa.Uuid(), nullable=False),
+        sa.Column('company_name', sa.String(length=100), nullable=False),
+        sa.ForeignKeyConstraint(
+            ['user_id'],
+            ['tb_users.id'],
+            name=op.f('tb_clients_user_id_fkey'),
+            ondelete='RESTRICT',
+        ),
+        sa.PrimaryKeyConstraint('id', name=op.f('tb_clients_pkey')),
+    )
+    op.create_index(op.f('tb_clients_id_idx'), 'tb_clients', ['id'], unique=True)
+    op.create_index(
+        op.f('tb_clients_user_id_idx'), 'tb_clients', ['user_id'], unique=True
+    )
+    op.create_table(
         'tb_brands',
         sa.Column(
             'id', sa.Uuid(), server_default=sa.text('gen_random_uuid()'), nullable=False
         ),
         sa.Column('name', sa.String(length=50), nullable=False),
-        sa.Column('user_id', sa.Uuid(), nullable=False),
+        sa.Column('client_id', sa.Uuid(), nullable=False),
         sa.Column(
             'created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False
         ),
@@ -65,24 +90,24 @@ def upgrade() -> None:
             'updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False
         ),
         sa.ForeignKeyConstraint(
-            ['user_id'], ['tb_users.id'], name=op.f('tb_brands_user_id_fkey')
+            ['client_id'], ['tb_clients.id'], name=op.f('tb_brands_client_id_fkey')
         ),
         sa.PrimaryKeyConstraint('id', name=op.f('tb_brands_pkey')),
+    )
+    op.create_index(
+        op.f('tb_brands_client_id_idx'), 'tb_brands', ['client_id'], unique=False
     )
     op.create_index(
         op.f('tb_brands_created_at_idx'), 'tb_brands', ['created_at'], unique=False
     )
     op.create_index(op.f('tb_brands_id_idx'), 'tb_brands', ['id'], unique=True)
-    op.create_index(
-        op.f('tb_brands_user_id_idx'), 'tb_brands', ['user_id'], unique=False
-    )
     op.create_table(
         'tb_categories',
         sa.Column(
             'id', sa.Uuid(), server_default=sa.text('gen_random_uuid()'), nullable=False
         ),
         sa.Column('name', sa.String(length=50), nullable=False),
-        sa.Column('user_id', sa.Uuid(), nullable=False),
+        sa.Column('client_id', sa.Uuid(), nullable=False),
         sa.Column(
             'created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False
         ),
@@ -90,10 +115,16 @@ def upgrade() -> None:
             'updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False
         ),
         sa.ForeignKeyConstraint(
-            ['user_id'], ['tb_users.id'], name=op.f('tb_categories_user_id_fkey')
+            ['client_id'], ['tb_clients.id'], name=op.f('tb_categories_client_id_fkey')
         ),
         sa.PrimaryKeyConstraint('id', name=op.f('tb_categories_pkey')),
         sa.UniqueConstraint('name', name=op.f('tb_categories_name_key')),
+    )
+    op.create_index(
+        op.f('tb_categories_client_id_idx'),
+        'tb_categories',
+        ['client_id'],
+        unique=False,
     )
     op.create_index(
         op.f('tb_categories_created_at_idx'),
@@ -102,9 +133,6 @@ def upgrade() -> None:
         unique=False,
     )
     op.create_index(op.f('tb_categories_id_idx'), 'tb_categories', ['id'], unique=True)
-    op.create_index(
-        op.f('tb_categories_user_id_idx'), 'tb_categories', ['user_id'], unique=False
-    )
     op.create_table(
         'tb_products',
         sa.Column(
@@ -117,7 +145,7 @@ def upgrade() -> None:
         sa.Column('stock', sa.Integer(), nullable=False),
         sa.Column('code_product', sa.String(length=8), nullable=False),
         sa.Column('barcode', sa.String(length=13), nullable=False),
-        sa.Column('user_id', sa.Uuid(), nullable=False),
+        sa.Column('client_id', sa.Uuid(), nullable=False),
         sa.Column(
             'created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False
         ),
@@ -140,7 +168,7 @@ def upgrade() -> None:
             name=op.f('tb_products_category_id_fkey'),
         ),
         sa.ForeignKeyConstraint(
-            ['user_id'], ['tb_users.id'], name=op.f('tb_products_user_id_fkey')
+            ['client_id'], ['tb_clients.id'], name=op.f('tb_products_client_id_fkey')
         ),
         sa.PrimaryKeyConstraint('id', name=op.f('tb_products_pkey')),
         sa.UniqueConstraint('barcode', name=op.f('tb_products_barcode_key')),
@@ -157,31 +185,34 @@ def upgrade() -> None:
         unique=False,
     )
     op.create_index(
+        op.f('tb_products_client_id_idx'), 'tb_products', ['client_id'], unique=False
+    )
+    op.create_index(
         op.f('tb_products_created_at_idx'), 'tb_products', ['created_at'], unique=False
     )
     op.create_index(op.f('tb_products_id_idx'), 'tb_products', ['id'], unique=True)
-    op.create_index(
-        op.f('tb_products_user_id_idx'), 'tb_products', ['user_id'], unique=False
-    )
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_index(op.f('tb_products_user_id_idx'), table_name='tb_products')
     op.drop_index(op.f('tb_products_id_idx'), table_name='tb_products')
     op.drop_index(op.f('tb_products_created_at_idx'), table_name='tb_products')
+    op.drop_index(op.f('tb_products_client_id_idx'), table_name='tb_products')
     op.drop_index(op.f('tb_products_category_id_idx'), table_name='tb_products')
     op.drop_index(op.f('tb_products_brand_id_idx'), table_name='tb_products')
     op.drop_table('tb_products')
-    op.drop_index(op.f('tb_categories_user_id_idx'), table_name='tb_categories')
     op.drop_index(op.f('tb_categories_id_idx'), table_name='tb_categories')
     op.drop_index(op.f('tb_categories_created_at_idx'), table_name='tb_categories')
+    op.drop_index(op.f('tb_categories_client_id_idx'), table_name='tb_categories')
     op.drop_table('tb_categories')
-    op.drop_index(op.f('tb_brands_user_id_idx'), table_name='tb_brands')
     op.drop_index(op.f('tb_brands_id_idx'), table_name='tb_brands')
     op.drop_index(op.f('tb_brands_created_at_idx'), table_name='tb_brands')
+    op.drop_index(op.f('tb_brands_client_id_idx'), table_name='tb_brands')
     op.drop_table('tb_brands')
+    op.drop_index(op.f('tb_clients_user_id_idx'), table_name='tb_clients')
+    op.drop_index(op.f('tb_clients_id_idx'), table_name='tb_clients')
+    op.drop_table('tb_clients')
     op.drop_index(op.f('tb_users_phone_number_idx'), table_name='tb_users')
     op.drop_index(op.f('tb_users_is_active_idx'), table_name='tb_users')
     op.drop_index(op.f('tb_users_id_idx'), table_name='tb_users')

@@ -11,7 +11,7 @@ from app.database import table_registry
 from app.product.brand.model import Brand  # noqa
 from app.product.category.model import Category  # noqa
 from app.product.model import Product  # noqa
-from app.user.model import User  # noqa
+from app.user.model import Client, User  # noqa
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
