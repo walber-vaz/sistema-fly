@@ -1,15 +1,15 @@
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.user.model import User
 from app.utils import RoleEnum
 
 
-def seed_superuser(session: Session) -> None:
-    user = session.execute(
-        select(User).where(User.email == settings.ADMIN_USER['email'])
-    ).first()
+async def seed_superuser(session: AsyncSession) -> None:
+    stmt = select(User).where(User.email == settings.ADMIN_USER['email'])
+    result = await session.execute(stmt)
+    user = result.scalar_one_or_none()
 
     if not user:
         user = User(
@@ -23,4 +23,4 @@ def seed_superuser(session: Session) -> None:
         )
 
         session.add(user)
-        session.commit()
+        await session.commit()
