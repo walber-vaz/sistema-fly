@@ -12,103 +12,133 @@ enum UserType {
     ADMIN
 }
 
-model Company {
-    id        String   @id @default(cuid())
-    name      String   @unique @db.VarChar(80)
-    logoUrl   String?
-    addressId String?
-    userId    String   @unique
-    createdAt DateTime @default(now()) @db.Timestamp(6)
-    updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(6)
-
-    address Address? @relation(fields: [addressId], references: [id])
-    user    User     @relation(fields: [userId], references: [id], onDelete: Restrict)
-
-    @@map("tb_companies")
+enum StatusOrder {
+    PAID
+    CANCELED
 }
 
 model Address {
-    id         String    @id @default(cuid())
-    street     String    @db.VarChar(80)
-    city       String    @db.VarChar(80)
-    state      String    @db.Char(2)
-    zip        String    @db.Char(9)
-    number     String    @db.VarChar(10)
-    complement String?   @db.Text
-    createdAt  DateTime  @default(now()) @db.Timestamp(6)
-    updatedAt  DateTime  @default(now()) @updatedAt @db.Timestamp(6)
-    Company    Company[]
-    user       User[]
+    id           String   @id @default(uuid())
+    street       String   @db.VarChar(200)
+    city         String   @db.VarChar(100)
+    state        String   @db.VarChar(100)
+    zip          String   @db.VarChar(9)
+    number       String   @db.VarChar(10)
+    neighborhood String   @db.VarChar(100)
+    complement   String?  @db.VarChar(100)
+    createdAt    DateTime @default(now()) @db.Timestamp(6)
+    updatedAt    DateTime @default(now()) @updatedAt @db.Timestamp(6)
+    users        User[]
 
-    @@map("tb_addresses")
+    @@index([street, city, state, zip], name: "address_index")
+    @@map("tb_address")
 }
 
 model User {
-    id                  String           @id @default(cuid())
-    firstName           String           @db.VarChar(80)
-    lastName            String           @db.VarChar(80)
-    email               String           @unique @db.VarChar(200)
-    password            String
-    addressId           String?
-    userType            UserType         @default(CUSTOMER)
-    roles               Role[]
-    permissions         UserPermission[]
-    lastLogin           DateTime?
-    failedLoginAttempts Int?             @default(0)
-    passwordChangedAt   DateTime?
-    resetPasswordToken  String?
-    tokenExpiresAt      DateTime?
-    isActive            Boolean          @default(true) @db.Boolean
-    createdAt           DateTime         @default(now()) @db.Timestamp(6)
-    updatedAt           DateTime         @default(now()) @updatedAt @db.Timestamp(6)
-
-    Company Company?
-    Address Address? @relation(fields: [addressId], references: [id], onDelete: Restrict)
-
-    @@index([email, isActive])
-    @@index([userType])
-    @@index([lastLogin])
-    @@index([failedLoginAttempts])
-    @@map("tb_users")
-}
-
-model Role {
-    id          String       @id @default(cuid())
-    name        String       @unique @db.VarChar(80)
-    description String?      @db.Text
-    users       User[]
-    permissions Permission[]
-    createdAt   DateTime     @default(now()) @db.Timestamp(6)
-    updatedAt   DateTime     @default(now()) @updatedAt @db.Timestamp(6)
-
-    @@map("tb_roles")
-}
-
-model Permission {
-    id          String           @id @default(cuid())
-    name        String           @unique @db.VarChar(80)
-    description String?          @db.Text
-    roles       Role[]
-    users       UserPermission[]
-
+    id        String   @id @default(uuid())
+    email     String   @unique @db.VarChar(200)
+    password  String
+    firstName String   @db.VarChar(80)
+    lastName  String   @db.VarChar(80)
+    addressId String?
+    type      UserType @default(CUSTOMER)
+    isActive  Boolean  @default(true) @db.Boolean
+    phone     String   @unique @db.VarChar(12)
     createdAt DateTime @default(now()) @db.Timestamp(6)
     updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(6)
 
-    @@map("tb_permissions")
+    address    Address?   @relation(fields: [addressId], references: [id])
+    orders     Order[]
+    brands     Brand[]
+    categories Category[]
+    products   Product[]
+
+    @@index([firstName, lastName], name: "user_name_index")
+    @@index([isActive], name: "user_is_active_index")
+    @@map("tb_users")
 }
 
-model UserPermission {
-    id           String   @id @default(uuid())
-    userId       String
-    permissionId String
-    granted      Boolean  @default(true)
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
+model Brand {
+    id        String    @id @default(uuid())
+    name      String    @db.VarChar(100)
+    isActive  Boolean   @default(true) @db.Boolean
+    userId    String
+    createdAt DateTime  @default(now()) @db.Timestamp(6)
+    updatedAt DateTime  @default(now()) @updatedAt @db.Timestamp(6)
+    products  Product[]
 
-    permission Permission @relation(fields: [permissionId], references: [id])
-    user       User       @relation(fields: [userId], references: [id])
+    user User @relation(fields: [userId], references: [id])
 
-    @@unique([userId, permissionId])
-    @@index([granted])
-    @@map("tb_users_permissions")
+    @@index([name], name: "brand_name_index")
+    @@index([isActive], name: "brand_is_active_index")
+    @@map("tb_brands")
+}
+
+model Category {
+    id        String    @id @default(uuid())
+    name      String    @db.VarChar(100)
+    isActive  Boolean   @default(true) @db.Boolean
+    userId    String
+    createdAt DateTime  @default(now()) @db.Timestamp(6)
+    updatedAt DateTime  @default(now()) @updatedAt @db.Timestamp(6)
+    products  Product[]
+
+    user User @relation(fields: [userId], references: [id])
+
+    @@index([name], name: "category_name_index")
+    @@index([isActive], name: "category_is_active_index")
+    @@map("tb_categories")
+}
+
+model Product {
+    id          String   @id @default(uuid())
+    name        String   @db.VarChar(100)
+    description String?  @db.Text
+    price       Decimal  @db.Decimal(10, 2)
+    priceSale   Decimal  @db.Decimal(10, 2)
+    stock       Int      @default(0)
+    isActive    Boolean  @default(true) @db.Boolean
+    brandId     String?
+    categoryId  String?
+    userId      String
+    createdAt   DateTime @default(now()) @db.Timestamp(6)
+    updatedAt   DateTime @default(now()) @updatedAt @db.Timestamp(6)
+
+    user       User        @relation(fields: [userId], references: [id])
+    brand      Brand?      @relation(fields: [brandId], references: [id])
+    category   Category?   @relation(fields: [categoryId], references: [id])
+    orderItems OrderItem[]
+
+    @@index([name], name: "product_name_index")
+    @@index([isActive], name: "product_is_active_index")
+    @@map("tb_products")
+}
+
+model Order {
+    id          String      @id @default(uuid())
+    userId      String
+    total       Decimal     @db.Decimal(10, 2)
+    status      StatusOrder @default(PAID)
+    totalAmount Decimal     @db.Decimal(10, 2)
+    createdAt   DateTime    @default(now()) @db.Timestamp(6)
+
+    user       User        @relation(fields: [userId], references: [id])
+    orderItems OrderItem[]
+
+    @@map("tb_orders")
+}
+
+model OrderItem {
+    id        String   @id @default(uuid())
+    orderId   String
+    productId String
+    quantity  Int
+    price     Decimal  @db.Decimal(10, 2)
+    createdAt DateTime @default(now()) @db.Timestamp(6)
+    updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(6)
+
+    order   Order   @relation(fields: [orderId], references: [id])
+    product Product @relation(fields: [productId], references: [id])
+
+    @@map("tb_order_items")
 }
